@@ -1,6 +1,7 @@
 import { createAction, createReducer, createSelector, on, props } from '@ngrx/store'
 import { seedClaims } from './seed'
 import type { ClaimCase, ClaimFilters } from './models'
+import type { SalvageState } from './salvage.store'
 
 export type ClaimsState = {
   items: ClaimCase[]
@@ -12,7 +13,7 @@ export type ClaimsState = {
   toast: string
 }
 
-export type AppState = { claims: ClaimsState }
+export type AppState = { claims: ClaimsState; salvage: SalvageState }
 
 const persisted = localStorage.getItem('property-claims-draft-v1')
 

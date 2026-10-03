@@ -5,6 +5,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideStore } from '@ngrx/store'
 import { routes } from './app.routes'
 import { claimsReducer } from './core/claims.store'
+import { salvageReducer } from './core/salvage.store'
 import { mockApiInterceptor } from './core/mock-api.interceptor'
 
 export const appConfig: ApplicationConfig = {
@@ -13,6 +14,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([mockApiInterceptor])),
     provideAnimationsAsync(),
-    provideStore({ claims: claimsReducer }),
+    provideStore({ claims: claimsReducer, salvage: salvageReducer }),
   ],
 }

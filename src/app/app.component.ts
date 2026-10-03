@@ -47,6 +47,10 @@ import { loadClaimsSuccess, selectClaimsState, type AppState } from './core/clai
             <mat-icon matListItemIcon>fact_check</mat-icon>
             <span matListItemTitle>查勘定损</span>
           </a>
+          <a mat-list-item routerLink="/salvage" routerLinkActive="active">
+            <mat-icon matListItemIcon>savings</mat-icon>
+            <span matListItemTitle>残值分摊</span>
+          </a>
           <a mat-list-item routerLink="/review" routerLinkActive="active">
             <mat-icon matListItemIcon>approval</mat-icon>
             <span matListItemTitle>准备金审批</span>
