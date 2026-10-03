@@ -1,0 +1,141 @@
+import type { LedgerEvent, SalvageBatch } from './models'
+
+/**
+ * 残值批次种子：
+ * - 0918：混卖批次已复核、分摊生效，回收款正在冲减赔付方案。
+ * - 0927：批次已复核，但纸浆科目报价已更新到 V2，分摊依据失效待重算。
+ * - 0804（旧案件）：科目里填了残值却没有任何分摊账，需要"按残值补录"。
+ */
+export const seedSalvageBatches: SalvageBatch[] = [
+  {
+    id: 'SB-0001',
+    clientBatchId: 'CLI-A-0001',
+    batchNo: 'SB-20260920-01',
+    claimId: 'CLM-2026-0918',
+    lines: [
+      { itemId: 'LI-01', category: '房屋建筑', description: '冷库东侧墙体及屋面钢结构', salvageEstimate: 18000, quoteVersion: 2, quoteAmount: 742000 },
+      { itemId: 'LI-02', category: '机器设备', description: '速冻隧道 2 号线', salvageEstimate: 32000, quoteVersion: 1, quoteAmount: 520000 },
+    ],
+    dealAmount: 45000,
+    returnedAmount: 0,
+    sourceTag: '常规混卖',
+    submittedBy: '林淼 / 残值经办',
+    submittedAt: '2026-09-20 09:40',
+    reviewedBy: '韩薇 / 残值复核',
+    reviewedAt: '2026-09-20 14:05',
+    reviewStale: false,
+    entries: [
+      {
+        id: 'AL-LI-01-1',
+        version: 1,
+        itemId: 'LI-01',
+        category: '房屋建筑',
+        weight: 0.4,
+        allocatedAmount: 18000,
+        basisDealAmount: 45000,
+        basisReturnedAmount: 0,
+        basisQuoteVersion: 2,
+        computedAt: '2026-09-20 09:42',
+        planLabels: ['方案 A · 现状评估', '方案 B · 核减待证部分'],
+      },
+      {
+        id: 'AL-LI-02-1',
+        version: 1,
+        itemId: 'LI-02',
+        category: '机器设备',
+        weight: 0.6,
+        allocatedAmount: 27000,
+        basisDealAmount: 45000,
+        basisReturnedAmount: 0,
+        basisQuoteVersion: 1,
+        computedAt: '2026-09-20 09:42',
+        planLabels: ['方案 A · 现状评估', '方案 B · 核减待证部分'],
+      },
+    ],
+    entryHistory: [],
+    conflicts: [],
+  },
+  {
+    id: 'SB-0002',
+    clientBatchId: 'CLI-A-0002',
+    batchNo: 'SB-20260925-01',
+    claimId: 'CLM-2026-0927',
+    lines: [
+      { itemId: 'LI-11', category: '房屋建筑', description: '仓储库房屋面和排水天沟', salvageEstimate: 8000, quoteVersion: 1, quoteAmount: 420000 },
+      { itemId: 'LI-12', category: '存货', description: '进口纸浆', salvageEstimate: 96000, quoteVersion: 1, quoteAmount: 440000 },
+    ],
+    dealAmount: 90000,
+    returnedAmount: 0,
+    sourceTag: '常规混卖',
+    submittedBy: '林淼 / 残值经办',
+    submittedAt: '2026-09-25 10:12',
+    reviewedBy: '韩薇 / 残值复核',
+    reviewedAt: '2026-09-25 15:30',
+    reviewStale: false,
+    entries: [
+      {
+        id: 'AL-LI-11-1',
+        version: 1,
+        itemId: 'LI-11',
+        category: '房屋建筑',
+        weight: 0.0769,
+        allocatedAmount: 6923,
+        basisDealAmount: 90000,
+        basisReturnedAmount: 0,
+        basisQuoteVersion: 1,
+        computedAt: '2026-09-25 10:15',
+        planLabels: ['方案 A · 现状评估'],
+      },
+      {
+        id: 'AL-LI-12-1',
+        version: 1,
+        itemId: 'LI-12',
+        category: '存货',
+        weight: 0.9231,
+        allocatedAmount: 83077,
+        basisDealAmount: 90000,
+        basisReturnedAmount: 0,
+        basisQuoteVersion: 1,
+        computedAt: '2026-09-25 10:15',
+        planLabels: ['方案 A · 现状评估'],
+      },
+    ],
+    entryHistory: [],
+    conflicts: [],
+  },
+]
+
+export const seedLedgerEvents: LedgerEvent[] = [
+  {
+    id: 'LE-01',
+    at: '2026-09-20 09:42',
+    claimId: 'CLM-2026-0918',
+    operator: '系统',
+    action: '分摊生成',
+    detail: 'SB-20260920-01 成交额 45,000 元按残值占比分摊至房屋建筑、机器设备。',
+  },
+  {
+    id: 'LE-02',
+    at: '2026-09-20 14:05',
+    claimId: 'CLM-2026-0918',
+    operator: '韩薇 / 残值复核',
+    action: '批次复核',
+    detail: 'SB-20260920-01 复核通过，回收款开始冲减赔付方案。',
+  },
+  {
+    id: 'LE-03',
+    at: '2026-09-25 10:15',
+    claimId: 'CLM-2026-0927',
+    operator: '系统',
+    action: '分摊生成',
+    detail: 'SB-20260925-01 成交额 90,000 元按残值占比分摊至房屋建筑、存货。',
+  },
+  {
+    id: 'LE-04',
+    at: '2026-09-25 15:30',
+    claimId: 'CLM-2026-0927',
+    operator: '韩薇 / 残值复核',
+    action: '批次复核',
+    detail: 'SB-20260925-01 复核通过。',
+  },
+]

@@ -14,7 +14,13 @@ export type ClaimsState = {
 
 export type AppState = { claims: ClaimsState }
 
-const persisted = localStorage.getItem('property-claims-draft-v1')
+const persisted = (() => {
+  const raw = localStorage.getItem('property-claims-draft-v2')
+  if (raw) return JSON.parse(raw)
+  // 旧版本缓存（v1，无残值分摊账字段）作废，回到种子数据
+  localStorage.removeItem('property-claims-draft-v1')
+  return null
+})()
 
 export const initialClaimsState: ClaimsState = persisted
   ? JSON.parse(persisted)

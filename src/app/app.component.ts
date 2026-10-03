@@ -10,7 +10,9 @@ import { MatChipsModule } from '@angular/material/chips'
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'
 import { Store } from '@ngrx/store'
 import { ClaimsService } from './core/claims.service'
-import { loadClaimsSuccess, selectClaimsState, type AppState } from './core/claims.store'
+import { SalvageService } from './salvage/salvage.service'
+import { loadClaimsSuccess, selectClaimsState } from './core/claims.store'
+import { loadBatches as loadSalvageBatches, selectSalvageState, type RootState } from './salvage/salvage.store'
 
 @Component({
   selector: 'app-root',
@@ -46,6 +48,10 @@ import { loadClaimsSuccess, selectClaimsState, type AppState } from './core/clai
           <a mat-list-item routerLink="/assessment" routerLinkActive="active">
             <mat-icon matListItemIcon>fact_check</mat-icon>
             <span matListItemTitle>查勘定损</span>
+          </a>
+          <a mat-list-item routerLink="/salvage" routerLinkActive="active">
+            <mat-icon matListItemIcon>inventory_2</mat-icon>
+            <span matListItemTitle>残值分摊账</span>
           </a>
           <a mat-list-item routerLink="/review" routerLinkActive="active">
             <mat-icon matListItemIcon>approval</mat-icon>
@@ -98,17 +104,33 @@ export class AppComponent implements OnInit {
 
   constructor(
     private readonly service: ClaimsService,
-    private readonly store: Store<AppState>,
+    private readonly salvageService: SalvageService,
+    private readonly store: Store<RootState>,
     private readonly snackBar: MatSnackBar,
   ) {}
 
   ngOnInit() {
-    this.service.list({ query: '', status: '', risk: '', page: 1, pageSize: 10 }).subscribe((result) => {
+    this.service.list({ query: '', status: '', risk: '', page: 1, pageSize: 50 }).subscribe((result) => {
       this.store.dispatch(loadClaimsSuccess({ items: result.items, total: result.total }))
     })
+    this.salvageService.list().subscribe((batches) => this.store.dispatch(loadSalvageBatches({ batches })))
     this.store.select(selectClaimsState).subscribe((state) => {
-      localStorage.setItem('property-claims-draft-v1', JSON.stringify(state))
+      localStorage.setItem('property-claims-draft-v2', JSON.stringify(state))
       if (state.toast) this.snackBar.open(state.toast, '关闭', { duration: 1800 })
+    })
+    // 残值状态持久化：本地暂存批次（失败保留可恢复）与已放行方案跨刷新保留
+    this.store.select(selectSalvageState).subscribe((state) => {
+      localStorage.setItem(
+        'property-claims-salvage-v1',
+        JSON.stringify({
+          batches: state.batches,
+          localDrafts: state.localDrafts,
+          events: state.events,
+          selectedClaimId: state.selectedClaimId,
+          released: state.released,
+        }),
+      )
+      if (state.toast) this.snackBar.open(state.toast, '关闭', { duration: 2200 })
     })
   }
 }
